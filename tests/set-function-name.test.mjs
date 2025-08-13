@@ -18,6 +18,6 @@ describe('setFunctionName', () => {
     });
     assert.equal(fn.name, 'cannotmodify');
     setFunctionName(fn, 'newName');
-    assert.equal(fn.name, 'newName');
+    assert.equal(fn.name, 'cannotmodify');
   });
 });

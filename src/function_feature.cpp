@@ -15,7 +15,7 @@ void Set(v8Iso isolate, LObj result, LCtx context, const char* k, bool v) {
   auto raw = v8::String::NewFromUtf8(isolate, k, v8::NewStringType::kNormal);
   LStr key = raw.ToLocalChecked();
 
-  v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, k);
+  v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, v);
 
   result->Set(context, key, value).Check();
 }
@@ -84,11 +84,11 @@ NAN_METHOD(SetFunctionName) {
     Nan::ThrowTypeError("Second argument must be a string");
     return;
   }
-  LFun func = LFun::Cast(info[0]);
+  LFun fn = LFun::Cast(info[0]);
   v8Iso isolate = info.GetIsolate();
   LStr name = info[1].As<v8::String>();
-  func->SetName(name);
-  info.GetReturnValue().Set(func);
+  fn->SetName(name);
+  info.GetReturnValue().Set(fn);
 }
 
 // Module initialization
