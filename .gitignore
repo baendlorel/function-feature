@@ -1,5 +1,14 @@
 .vscode/settings.json
-node_modules
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+build/
+dist/
 
 # Prerequisites
 *.d

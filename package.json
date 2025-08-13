@@ -1,0 +1,59 @@
+{
+  "name": "function-kind",
+  "version": "1.0.0",
+  "description": "Get JavaScript function's internal properties using V8 engine to determine function kinds",
+  "author": {
+    "name": "KasukabeTsumugi",
+    "email": "futami16237@gmail.com"
+  },
+  "exports": {
+    "import": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "build": "node-gyp rebuild",
+    "test": "node tests/test.js",
+    "test:edge": "node tests/edge-cases.js",
+    "example": "node example.js",
+    "clean": "node-gyp clean",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "function",
+    "v8",
+    "native",
+    "addon",
+    "javascript",
+    "functionkind",
+    "class",
+    "constructor",
+    "async",
+    "generator",
+    "arrow",
+    "nan",
+    "introspection"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baendlorel/function-kind.git"
+  },
+  "bugs": {
+    "url": "https://github.com/baendlorel/function-kind/issues"
+  },
+  "homepage": "https://github.com/baendlorel/function-kind#readme",
+  "dependencies": {
+    "nan": "^2.17.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "gypfile": true
+}
