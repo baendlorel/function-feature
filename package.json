@@ -1,6 +1,6 @@
 {
   "name": "function-feature",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction) or other features using native V8 APIs",
   "author": {
     "name": "KasukabeTsumugi",
@@ -52,7 +52,7 @@
     "prebuild-install": "^7.1.3"
   },
   "devDependencies": {
-    "function-feature": "^0.0.2",
+    "function-feature": "^1.0.0",
     "node-gyp": "^10.0.0",
     "prebuildify": "^6.0.1",
     "vitest": "^3.2.4"
