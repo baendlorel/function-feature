@@ -5,8 +5,10 @@ import { getBoundFunction } from '../lib/index.mjs';
 describe('getBoundFunction', () => {
   it('returns original for bound', () => {
     function bar() {}
-    const bound = bar.bind(null);
-    assert.equal(getBoundFunction(bound), bar);
+    const bound1 = bar.bind(null);
+    const bound2 = bound1.bind(null);
+    assert.equal(getBoundFunction(bound1), bar);
+    assert.notEqual(getBoundFunction(bound2), getBoundFunction(bound1));
   });
 
   it('returns undefined for non-bound', () => {
