@@ -2,11 +2,17 @@
 #include <v8.h>
 #include <string>
 
-std::string _StripComment(const std::string& src) {
-  std::string out;
-  size_t i = 0, len = src.length();
+/**
+ * Check if `{` appears before `(` in a function string
+ *
+ * - ignores comment
+ * @param src function string
+ */
+bool _HasBraceBeforeParen(const std::string& src) {
+  size_t i = 4, len = src.length();
   while (i < len) {
-    // match /* ... */
+    // & skip comment
+    // skip /* ... */
     if (i + 1 < len && src[i] == '/' && src[i + 1] == '*') {
       i += 2;
       while (i + 1 < len && !(src[i] == '*' && src[i + 1] == '/')) {
@@ -14,7 +20,7 @@ std::string _StripComment(const std::string& src) {
       }
       i += 2;  // skip */
     }
-    // match // ...
+    // skip // ...
     else if (i + 1 < len && src[i] == '/' && src[i + 1] == '/') {
       i += 2;
       while (i < len && src[i] != '\n') {
@@ -22,17 +28,21 @@ std::string _StripComment(const std::string& src) {
       }
       // keep the newline character
       if (i < len && src[i] == '\n') {
-        out += '\n';
         i++;
       }
     }
-    // normal chars
+    // & not comment
     else {
-      out += src[i];
+      if (src[i] == '{') {
+        return true;
+      }
+      if (src[i] == '(') {
+        return false;
+      }
       i++;
     }
   }
-  return out;
+  return false;
 }
 
 namespace function_feature {
@@ -138,26 +148,15 @@ bool _IsNativeConstructor(LFun func, Isol isolate) {
 
 // Check if function string starts with 'class' or '[class'
 bool _HasClassSyntax(const std::string& func_str) {
-  if (func_str.length() < 7)
+  // minimum length for a class definition is 'class{}'
+  if (func_str.length() < 7) {
     return false;
-
-  // 先去除注释
-  std::string code = _StripComment(func_str);
-
-  // Check for 'class' at the beginning
-  if (code.substr(0, 5) == "class") {
-    // Find the opening brace
-    size_t brace_pos = code.find('{');
-    if (brace_pos != std::string::npos) {
-      // Check if there's no parenthesis before the brace
-      size_t paren_pos = code.find('(');
-      return paren_pos == std::string::npos || paren_pos > brace_pos;
-    }
   }
 
-  // Check for '[class' at the beginning (native class toString)
-  if (code.length() >= 6 && code.substr(0, 6) == "[class") {
-    return true;
+  // Check for 'class' at the beginning
+  if (func_str.substr(0, 5) == "class" || func_str.substr(0, 6) == "[class") {
+    // 跳过注释，判断在未遇到圆括号时先遇到大括号
+    return _HasBraceBeforeParen(func_str);
   }
 
   return false;
