@@ -1,48 +1,39 @@
 /**
- * Result object for V8 function type flags analysis.
+ * Result object for V8 function feature analysis.
  *
  * - isConstructor: `true` if the function is a constructor (can be called with new).
- *   - this is intrinsic, even if it is proxied and prevented from being called with new.
  * - isAsyncFunction: `true` if the function is an async function.
  * - isGeneratorFunction: `true` if the function is a generator function.
- * - isArrowFunction: true if and only if all three above are false;
- *   - `true` if and only if isConstructor, isAsyncFunction, and isGeneratorFunction are all false.
- *   - `false` if isConstructor is true.
- *   - `null` in all other cases.
+ * - isProxy: `true` if the function is a Proxy.
+ * - isCallable: `true` if the function is callable.
+ * - isBound: `true` if the function is a bound function (created by Function.prototype.bind).
  */
-export interface FunctionKindResult {
-  /**
-   * True if the function is a constructor (can be called with new).
-   */
+export interface FunctionFeaturesResult {
   isConstructor: boolean;
-
-  /**
-   * True if the function is an async function (declared with async).
-   */
   isAsyncFunction: boolean;
-
-  /**
-   * True if the function is a generator function (declared with *).
-   */
   isGeneratorFunction: boolean;
-
   isProxy: boolean;
-
   isCallable: boolean;
+  isBound: boolean;
 }
 
 /**
- * Analyze a JavaScript function using V8 internals and return its type flags.
- * 
- * - `isConstructor`: `true` if the function is a constructor (can be called with new).
- *   - this is intrinsic, even if it is proxied and prevented from being called with new.
- * - `isAsyncFunction`: `true` if the function is an async function.
- * - `isGeneratorFunction`: `true` if the function is a generator function.
- * - `isProxy`: 
- * - `isCallable`: 
+ * Analyze a JavaScript function using V8 internals and return its feature flags.
  *
- * @param func The function to analyze.
- * @returns An object containing isConstructor, isAsyncFunction, isGeneratorFunction, and isArrowFunction.
-
+ * @param fn The function to analyze.
+ * @returns An object containing isConstructor, isAsyncFunction, isGeneratorFunction, isProxy, isCallable, isBound.
  */
-export declare function getFunctionKind(func: Function): FunctionKindResult;
+export declare function getFunctionFeatures(fn: Function): FunctionFeaturesResult;
+
+/**
+ * If the function is bound, returns the original function. Otherwise returns undefined.
+ */
+export declare function getBoundFunction(fn: Function): Function | undefined;
+
+/**
+ * Set the name of a function (C++ layer, ignores configurable).
+ * @param fn The function to rename.
+ * @param name The new name.
+ * @returns The function itself.
+ */
+export declare function setFunctionName(fn: Function, name: string): Function;

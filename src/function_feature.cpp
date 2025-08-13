@@ -54,7 +54,6 @@ NAN_METHOD(GetFunctionFeatures) {
   info.GetReturnValue().Set(result);
 }
 
-// NAN method: getBoundFunction
 NAN_METHOD(GetBoundFunction) {
   if (info.Length() != 1) {
     Nan::ThrowTypeError("Expected exactly 1 argument");
@@ -71,6 +70,27 @@ NAN_METHOD(GetBoundFunction) {
   info.GetReturnValue().Set(bound);
 }
 
+// NAN method: setFunctionName
+NAN_METHOD(SetFunctionName) {
+  if (info.Length() != 2) {
+    Nan::ThrowTypeError("Expected 2 arguments: function, name");
+    return;
+  }
+  if (!info[0]->IsFunction()) {
+    Nan::ThrowTypeError("First argument must be a function");
+    return;
+  }
+  if (!info[1]->IsString()) {
+    Nan::ThrowTypeError("Second argument must be a string");
+    return;
+  }
+  LFun func = LFun::Cast(info[0]);
+  v8Iso isolate = info.GetIsolate();
+  LStr name = info[1].As<v8::String>();
+  func->SetName(name);
+  info.GetReturnValue().Set(func);
+}
+
 // Module initialization
 NAN_MODULE_INIT(Init) {
   Nan::Set(target, Nan::New("getFunctionFeatures").ToLocalChecked(),
@@ -78,6 +98,9 @@ NAN_MODULE_INIT(Init) {
                .ToLocalChecked());
   Nan::Set(target, Nan::New("getBoundFunction").ToLocalChecked(),
            Nan::GetFunction(Nan::New<v8::FunctionTemplate>(GetBoundFunction))
+               .ToLocalChecked());
+  Nan::Set(target, Nan::New("setFunctionName").ToLocalChecked(),
+           Nan::GetFunction(Nan::New<v8::FunctionTemplate>(SetFunctionName))
                .ToLocalChecked());
 }
 

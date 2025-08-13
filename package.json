@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "node-gyp rebuild",
-    "test": "node tests/index.test.mjs",
+    "test": "node --test",
     "clean": "node-gyp clean",
     "rebuild": "npm run clean && npm run build"
   },
