@@ -2,6 +2,39 @@
 #include <v8.h>
 #include <string>
 
+std::string _StripComment(const std::string& src) {
+  std::string out;
+  size_t i = 0, len = src.length();
+  while (i < len) {
+    // match /* ... */
+    if (i + 1 < len && src[i] == '/' && src[i + 1] == '*') {
+      i += 2;
+      while (i + 1 < len && !(src[i] == '*' && src[i + 1] == '/')) {
+        i++;
+      }
+      i += 2;  // skip */
+    }
+    // match // ...
+    else if (i + 1 < len && src[i] == '/' && src[i + 1] == '/') {
+      i += 2;
+      while (i < len && src[i] != '\n') {
+        i++;
+      }
+      // keep the newline character
+      if (i < len && src[i] == '\n') {
+        out += '\n';
+        i++;
+      }
+    }
+    // normal chars
+    else {
+      out += src[i];
+      i++;
+    }
+  }
+  return out;
+}
+
 namespace function_feature {
 typedef v8::Local<v8::Context> LCtx;
 typedef v8::Local<v8::Function> LFun;
@@ -103,24 +136,27 @@ bool _IsNativeConstructor(LFun func, Isol isolate) {
   return false;
 }
 
-// Check if function string starts with 'class ' or '[class '
+// Check if function string starts with 'class' or '[class'
 bool _HasClassSyntax(const std::string& func_str) {
-  if (func_str.length() < 6)
+  if (func_str.length() < 7)
     return false;
 
-  // Check for 'class ' at the beginning
-  if (func_str.substr(0, 6) == "class") {
+  // 先去除注释
+  std::string code = _StripComment(func_str);
+
+  // Check for 'class' at the beginning
+  if (code.substr(0, 5) == "class") {
     // Find the opening brace
-    size_t brace_pos = func_str.find('{');
+    size_t brace_pos = code.find('{');
     if (brace_pos != std::string::npos) {
       // Check if there's no parenthesis before the brace
-      size_t paren_pos = func_str.find('(');
+      size_t paren_pos = code.find('(');
       return paren_pos == std::string::npos || paren_pos > brace_pos;
     }
   }
 
-  // Check for '[class ' at the beginning (native class toString)
-  if (func_str.length() >= 7 && func_str.substr(0, 7) == "[class") {
+  // Check for '[class' at the beginning (native class toString)
+  if (code.length() >= 6 && code.substr(0, 6) == "[class") {
     return true;
   }
 
