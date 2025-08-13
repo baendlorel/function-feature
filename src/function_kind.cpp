@@ -11,11 +11,11 @@ namespace function_kind {
 //   return v8Func.;  // 需要 V8 调试符号
 // }
 
-void SetResult(v8::Isolate* isolate,
-               v8::Local<v8::Object> result,
-               v8::Local<v8::Context> context,
-               const char* key,
-               bool value) {
+void Set(v8::Isolate* isolate,
+         v8::Local<v8::Object> result,
+         v8::Local<v8::Context> context,
+         const char* key,
+         bool value) {
   v8::Local<v8::String> v8_key =
       v8::String::NewFromUtf8(isolate, key, v8::NewStringType::kNormal)
           .ToLocalChecked();
@@ -24,21 +24,16 @@ void SetResult(v8::Isolate* isolate,
 }
 
 // Get V8 function type flags
-v8::Local<v8::Object> GetFunctionKind(v8::Local<v8::Function> func,
-                                      v8::Isolate* isolate) {
-  v8::EscapableHandleScope scope(isolate);
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  v8::Local<v8::Object> result = v8::Object::New(isolate);
+v8::Local<v8::Object> GetFunctionKind(v8::Local<v8::Function> fn,
+                                      v8::Isolate* islt) {
+  v8::EscapableHandleScope scope(islt);
+  v8::Local<v8::Context> ctx = islt->GetCurrentContext();
+  v8::Local<v8::Object> result = v8::Object::New(islt);
 
-  bool isConstructor = func->IsConstructor();
-  bool isAsync = func->IsAsyncFunction();
-  bool isGenerator = func->IsGeneratorFunction();
-  bool isProxy = func->IsProxy();
-
-  SetResult(isolate, result, context, "isConstructor", isConstructor);
-  SetResult(isolate, result, context, "isAsyncFunction", isAsync);
-  SetResult(isolate, result, context, "isGeneratorFunction", isGenerator);
-  SetResult(isolate, result, context, "isProxy", isProxy);
+  Set(islt, result, ctx, "isConstructor", fn->IsConstructor());
+  Set(islt, result, ctx, "isAsyncFunction", fn->IsAsyncFunction());
+  Set(islt, result, ctx, "isGeneratorFunction", fn->IsGeneratorFunction());
+  Set(islt, result, ctx, "isProxy", fn->IsProxy());
 
   return scope.Escape(result);
 }
