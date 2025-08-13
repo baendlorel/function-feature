@@ -14,4 +14,6 @@ for v in 16 18 20 22 24; do
 done
 
 # 恢复原来的 node 版本
+echo "---"
+echo "Restore to Node $current_nvm"
 nvm use $current_nvm

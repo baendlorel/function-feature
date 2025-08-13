@@ -1,6 +1,4 @@
 #include <node.h>
-#include <v8-exception.h>
-#include <v8-isolate.h>
 #include <v8.h>
 
 namespace function_feature {
@@ -28,7 +26,7 @@ void SetBool(LObj result, const char* k, bool v) {
   LStr key = ToKey(isolate, k);
 
   v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, v);
-  auto maybe_result = result->Set(ctx, key, value);
+  auto maybe_result = result->Set(ctx, v8::Local<v8::Value>::Cast(key), value);
   maybe_result.Check();
 }
 
@@ -41,7 +39,7 @@ void SetFn(LObj result, const char* k, FnCB fn) {
   v8::Local<v8::Function> value =
       tpl->GetFunction(isolate->GetCurrentContext()).ToLocalChecked();
 
-  auto maybe_result = result->Set(ctx, key, value);
+  auto maybe_result = result->Set(ctx, v8::Local<v8::Value>::Cast(key), value);
   maybe_result.Check();
 }
 
@@ -79,7 +77,8 @@ void GetFunctionFeatures(const v8::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  LFun func = LFun::Cast(info[0]);
+  v8::Local<v8::Value> arg0 = info[0];
+  LFun func = LFun::Cast(arg0);
   v8Iso isolate = info.GetIsolate();
 
   LObj result = GetFeatures(func, isolate);
@@ -97,7 +96,8 @@ void GetBoundFunction(const v8::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  LFun func = LFun::Cast(info[0]);
+  v8::Local<v8::Value> arg0 = info[0];
+  LFun func = LFun::Cast(arg0);
 
   v8::Local<v8::Value> bound = func->GetBoundFunction();
   info.GetReturnValue().Set(bound);
@@ -116,7 +116,8 @@ void SetFunctionName(const v8::FunctionCallbackInfo<v8::Value>& info) {
     Throws(info, "Second argument must be a string");
     return;
   }
-  LFun fn = LFun::Cast(info[0]);
+  v8::Local<v8::Value> arg0 = info[0];
+  LFun fn = LFun::Cast(arg0);
   v8Iso isolate = info.GetIsolate();
   LStr name = info[1].As<v8::String>();
   fn->SetName(name);

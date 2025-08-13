@@ -46,7 +46,7 @@ for version in "${NODE_VERSIONS[@]}"; do
   # 获取完整的版本号
   FULL_VERSION=$(node --version | sed 's/v//')
   echo "Using Node version: $FULL_VERSION"
-  echo "Using pnpm version: $(pnpm --version)"
+  echo "Using npm version: $(npm --version)"
   
   # 清理并重新编译
   echo "Cleaning previous build..."
@@ -62,7 +62,7 @@ for version in "${NODE_VERSIONS[@]}"; do
   
   # 使用 prebuildify 打包
   echo "Creating prebuild..."
-  pnpm exec prebuildify --napi=false --strip --target node@$FULL_VERSION
+  npx prebuildify --napi=false --strip --target node@$FULL_VERSION
   
   if [ $? -ne 0 ]; then
     echo "Error: Prebuildify failed for Node $version"
@@ -86,11 +86,4 @@ else
   echo "Warning: prebuilds directory not found"
 fi
 
-echo "Build summary:"
-for version in "${NODE_VERSIONS[@]}"; do
-  if [ -d "prebuilds/linux-x64-node-$version" ] || [ -d "prebuilds/*-node-$version" ]; then
-    echo "✓ Node $version: Success"
-  else
-    echo "✗ Node $version: Failed"
-  fi
-done
+echo "Building Finished"

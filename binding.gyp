@@ -5,9 +5,6 @@
       "sources": [
         "src/function_feature.cpp"
       ],
-      "include_dirs": [
-        "<!(node -e \"require('nan')\")"
-      ],
       "cflags": [
         "-Wall",
         "-Wextra"
@@ -15,7 +12,7 @@
       "cflags_cc": [
         "-Wall",
         "-Wextra",
-        "-std=c++17",
+        "-std=c++20",
         "-fno-exceptions"
       ],
       "defines": [
