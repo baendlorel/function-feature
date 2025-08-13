@@ -9,7 +9,7 @@ echo "Current node version: $current_node ($current_nvm)"
 
 for v in 16 18 20 22 23 24; do
   nvm use $v
-  node --test
+  node --test > "logs/$v.log"
   echo "Tested with Node $v"
 done
 
