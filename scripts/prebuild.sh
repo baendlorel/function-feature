@@ -11,8 +11,8 @@ echo "Current node version: $current_nvm"
 # 清理之前的预编译文件
 rm -rf prebuilds/
 
-# 支持的 Node 版本列表
-NODE_VERSIONS=(16 17 18 19 20 21 22 23 24)
+# 支持的 Node 版本列表 (跳过 Node 16，因为 pnpm 不支持)
+NODE_VERSIONS=(18 20 22 24)
 
 echo "Building for Node versions: ${NODE_VERSIONS[@]}"
 
@@ -28,9 +28,9 @@ for version in "${NODE_VERSIONS[@]}"; do
     continue
   fi
   
-  # 清理并重新编译
-  npm run clean
-  npm run build
+  # 直接调用 node-gyp，避免递归
+  node-gyp clean
+  node-gyp rebuild
   
   # 使用 prebuildify 打包
   npx prebuildify --napi=false --strip

@@ -20,9 +20,9 @@
     "build": "node-gyp rebuild",
     "test": "./scripts/test.sh",
     "clean": "node-gyp clean",
-    "rebuild": "pnpm clean && pnpm build",
+    "rebuild": "pnpm run clean && pnpm run build",
     "prebuild": "./scripts/prebuild.sh",
-    "install": "prebuild-install || pnpm rebuild"
+    "postinstall": "prebuild-install || pnpm run rebuild"
   },
   "keywords": [
     "function",
