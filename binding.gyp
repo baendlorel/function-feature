@@ -3,8 +3,7 @@
     {
       "target_name": "function_kind",
       "sources": [
-        "src/function_kind.cpp",
-        "src/v8_helpers.cpp"
+        "src/function_kind.cpp"
       ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")"

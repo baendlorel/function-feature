@@ -1,24 +1,24 @@
 {
   "name": "function-kind",
   "version": "1.0.0",
-  "description": "Get JavaScript function's internal properties using V8 engine to determine function kinds",
+  "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction) using native V8 APIs",
   "author": {
     "name": "KasukabeTsumugi",
     "email": "futami16237@gmail.com"
   },
   "exports": {
-    "import": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "install": "node-gyp rebuild",
     "build": "node-gyp rebuild",
-    "test": "node tests/test.js",
-    "test:edge": "node tests/edge-cases.js",
-    "example": "node example.js",
+    "test": "node tests/index.test.js",
     "clean": "node-gyp clean",
     "rebuild": "npm run clean && npm run build"
   },
