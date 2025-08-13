@@ -66,7 +66,7 @@ void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
           .ToLocalChecked()));
 }
 
-void GetFunctionFeatures(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void GetFeatures(const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() < 1) {
     Throws(info, "Expected at least 1 argument");
     return;
@@ -85,7 +85,7 @@ void GetFunctionFeatures(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(result);
 }
 
-void GetBoundFunction(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void GetBound(const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() < 1) {
     Throws(info, "Expected at least 1 argument");
     return;
@@ -103,7 +103,7 @@ void GetBoundFunction(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(bound);
 }
 
-void SetFunctionName(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void SetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() < 2) {
     Throws(info, "Expected at least 2 arguments: function, name");
     return;
@@ -124,7 +124,7 @@ void SetFunctionName(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(fn);
 }
 
-void FunctionProtoToString(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void ProtoToString(const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() < 1) {
     Throws(info, "Expected at least 1 argument");
     return;
@@ -143,10 +143,10 @@ void FunctionProtoToString(const v8::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void Init(v8::Local<v8::Object> target) {
-  SetFn(target, "getFeatures", GetFunctionFeatures);
-  SetFn(target, "getBound", GetBoundFunction);
-  SetFn(target, "setName", SetFunctionName);
-  SetFn(target, "functionProtoToString", FunctionProtoToString);
+  SetFn(target, "getFeatures", GetFeatures);
+  SetFn(target, "getBound", GetBound);
+  SetFn(target, "setName", SetName);
+  SetFn(target, "protoToString", ProtoToString);
 }
 
 NODE_MODULE(function_feature, Init)
