@@ -1,8 +1,7 @@
-#include <nan.h>
+#include <node.h>
 #include <v8-exception.h>
 #include <v8-isolate.h>
 #include <v8.h>
-using namespace Nan;
 
 namespace function_feature {
 typedef v8::Local<v8::Context> LCtx;
@@ -13,16 +12,20 @@ typedef v8::Local<v8::Object> LObj;
 typedef v8::Isolate* v8Iso;
 typedef v8::FunctionCallback FnCB;
 
-void SetBool(LObj result, const char* k, bool v) {
-  v8Iso isolate = result->GetIsolate();
-  LCtx ctx = isolate->GetCurrentContext();
-
+LStr ToKey(v8Iso isolate, const char* k) {
   auto strType = v8::NewStringType::kNormal;
   MLStr maybe_key = v8::String::NewFromUtf8(isolate, k, strType);
   LStr key;
   if (!maybe_key.ToLocal(&key)) {
-    return;
+    return key;  // Return an empty Local<String> if conversion fails
   }
+  return key;
+}
+
+void SetBool(LObj result, const char* k, bool v) {
+  v8Iso isolate = result->GetIsolate();
+  LCtx ctx = isolate->GetCurrentContext();
+  LStr key = ToKey(isolate, k);
 
   v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, v);
   auto maybe_result = result->Set(ctx, key, value);
@@ -32,13 +35,7 @@ void SetBool(LObj result, const char* k, bool v) {
 void SetFn(LObj result, const char* k, FnCB fn) {
   v8Iso isolate = result->GetIsolate();
   LCtx ctx = isolate->GetCurrentContext();
-
-  auto strType = v8::NewStringType::kNormal;
-  MLStr maybe_key = v8::String::NewFromUtf8(isolate, k, strType);
-  LStr key;
-  if (!maybe_key.ToLocal(&key)) {
-    return;
-  }
+  LStr key = ToKey(isolate, k);
 
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, fn);
   v8::Local<v8::Function> value =
@@ -126,8 +123,7 @@ void SetFunctionName(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(fn);
 }
 
-// Module initialization
-NAN_MODULE_INIT(Init) {
+void Init(v8::Local<v8::Object> target) {
   SetFn(target, "getFunctionFeatures", GetFunctionFeatures);
   SetFn(target, "getBoundFunction", GetBoundFunction);
   SetFn(target, "setFunctionName", SetFunctionName);
