@@ -9,6 +9,7 @@ type Fn = (...args: unknown[]) => unknown;
  * - isProxy: `true` if the function is a Proxy
  * - isCallable: `true` if the function is callable
  * - isBound: `true` if the function is a bound function (created by Function.prototype.bind)
+ * - isClass: `true` if the function is a class (either user-defined or native)
  */
 interface FunctionFeaturesResult {
   isConstructor: boolean;
@@ -17,6 +18,7 @@ interface FunctionFeaturesResult {
   isProxy: boolean;
   isCallable: boolean;
   isBound: boolean;
+  isClass: boolean;
 }
 
 /**
@@ -64,3 +66,16 @@ export declare function setName<T extends Fn>(fn: T, name: string): T;
  * @param fn The function to convert to a string
  */
 export declare function protoToString(fn: Fn): string;
+
+/**
+ * Check if a function is a class (either user-defined or native constructor)
+ *
+ * rules:
+ * 1. Must be a constructor
+ * 2. Gets the original function (unwraps bound functions)
+ * 3. Checks if it's a native constructor (Array, Object, etc.)
+ * 4. Checks function.toString() for class syntax patterns
+ * @param fn The function to check
+ * @returns true if the function is a class, false otherwise
+ */
+export declare function isClass(fn: Fn): boolean;

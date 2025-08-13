@@ -10,6 +10,7 @@ describe('getFeatures', () => {
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
     assert.equal(flags.isBound, false);
+    assert.equal(flags.isClass, false);
   });
 
   it('bound function', () => {
@@ -26,5 +27,6 @@ describe('getFeatures', () => {
     assert.equal(flags.isBound, false);
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isCallable, true);
+    assert.equal(flags.isClass, true);
   });
 });
