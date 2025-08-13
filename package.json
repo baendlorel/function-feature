@@ -54,7 +54,8 @@
   "devDependencies": {
     "function-feature": "^0.0.2",
     "node-gyp": "^10.0.0",
-    "prebuildify": "^6.0.1"
+    "prebuildify": "^6.0.1",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=16.0.0"
