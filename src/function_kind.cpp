@@ -1,9 +1,27 @@
 #include <nan.h>
+#include <v8-function.h>
 #include <v8.h>
 
 using namespace Nan;
 
 namespace function_kind {
+
+// bool IsArrowFunction(v8::Local<v8::Function> func) {
+//   v8::Function* v8Func = v8::Function::Cast(*func);
+//   return v8Func.;  // 需要 V8 调试符号
+// }
+
+void SetResult(v8::Isolate* isolate,
+               v8::Local<v8::Object> result,
+               v8::Local<v8::Context> context,
+               const char* key,
+               bool value) {
+  v8::Local<v8::String> v8_key =
+      v8::String::NewFromUtf8(isolate, key, v8::NewStringType::kNormal)
+          .ToLocalChecked();
+  v8::Local<v8::Boolean> v8_value = v8::Boolean::New(isolate, key);
+  result->Set(context, v8_key, v8_value).Check();
+}
 
 // Get V8 function type flags
 v8::Local<v8::Object> GetFunctionKind(v8::Local<v8::Function> func,
@@ -12,49 +30,15 @@ v8::Local<v8::Object> GetFunctionKind(v8::Local<v8::Function> func,
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   v8::Local<v8::Object> result = v8::Object::New(isolate);
 
-  // IsConstructor flag
   bool isConstructor = func->IsConstructor();
-  v8::Local<v8::String> is_constructor_key =
-      v8::String::NewFromUtf8(isolate, "isConstructor",
-                              v8::NewStringType::kNormal)
-          .ToLocalChecked();
-  v8::Local<v8::Boolean> is_constructor_value =
-      v8::Boolean::New(isolate, isConstructor);
-  result->Set(context, is_constructor_key, is_constructor_value).Check();
-
-  // IsAsyncFunction flag
   bool isAsync = func->IsAsyncFunction();
-  v8::Local<v8::String> is_async_key =
-      v8::String::NewFromUtf8(isolate, "isAsyncFunction",
-                              v8::NewStringType::kNormal)
-          .ToLocalChecked();
-  v8::Local<v8::Boolean> is_async_value = v8::Boolean::New(isolate, isAsync);
-  result->Set(context, is_async_key, is_async_value).Check();
-
-  // IsGeneratorFunction flag
   bool isGenerator = func->IsGeneratorFunction();
-  v8::Local<v8::String> is_generator_key =
-      v8::String::NewFromUtf8(isolate, "isGeneratorFunction",
-                              v8::NewStringType::kNormal)
-          .ToLocalChecked();
-  v8::Local<v8::Boolean> is_generator_value =
-      v8::Boolean::New(isolate, isGenerator);
-  result->Set(context, is_generator_key, is_generator_value).Check();
+  bool isProxy = func->IsProxy();
 
-  // isArrowFunction 字段逻辑
-  v8::Local<v8::String> is_arrow_key =
-      v8::String::NewFromUtf8(isolate, "isArrowFunction",
-                              v8::NewStringType::kNormal)
-          .ToLocalChecked();
-  v8::Local<v8::Value> is_arrow_value;
-  if (isConstructor) {
-    is_arrow_value = Nan::False();
-  } else if (!isConstructor && !isAsync && !isGenerator) {
-    is_arrow_value = Nan::True();
-  } else {
-    is_arrow_value = Nan::Null();
-  }
-  result->Set(context, is_arrow_key, is_arrow_value).Check();
+  SetResult(isolate, result, context, "isConstructor", isConstructor);
+  SetResult(isolate, result, context, "isAsyncFunction", isAsync);
+  SetResult(isolate, result, context, "isGeneratorFunction", isGenerator);
+  SetResult(isolate, result, context, "isProxy", isProxy);
 
   return scope.Escape(result);
 }
