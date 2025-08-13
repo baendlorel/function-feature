@@ -28,9 +28,24 @@ interface FunctionFeaturesResult {
 export declare function getFeatures(fn: Fn): FunctionFeaturesResult;
 
 /**
- * If the function is bound, returns the original function. Otherwise returns undefined
+ * Get the function `fn0` satisfies `fn = fn0.bind(thisArg, ...args)`
  */
 export declare function getBound<T extends Fn>(fn: T): T | undefined;
+
+/**
+ * If the function is bound, returns the most original function. Otherwise returns itself
+ * @example
+ * const f0 = function(...args) {};
+ * const f1 = f0.bind(null,1);
+ * const f2 = f1.bind(null,2);
+ *
+ * // returns the most original function
+ * console.log(getBoundOrigin(f2) === f0); // true
+ *
+ * // if not bound, return itself
+ * console.log(getBoundOrigin(f0) === f0); // true
+ */
+export declare function getBoundOrigin<T extends Fn>(fn: T): T | undefined;
 
 /**
  * Set the name of a function
