@@ -1,11 +1,11 @@
 import { it, describe } from 'node:test';
 import assert from 'node:assert';
-import { setFunctionName } from '../lib/index.mjs';
+import { setName } from '../lib/index.mjs';
 
-describe('setFunctionName', () => {
+describe('setName', () => {
   it('sets function name', () => {
     function fn() {}
-    setFunctionName(fn, 'newName');
+    setName(fn, 'newName');
     assert.equal(fn.name, 'newName');
   });
 
@@ -17,7 +17,7 @@ describe('setFunctionName', () => {
       writable: false,
     });
     assert.equal(fn.name, 'cannotmodify');
-    setFunctionName(fn, 'newName');
+    setName(fn, 'newName');
     assert.equal(fn.name, 'cannotmodify');
   });
 });

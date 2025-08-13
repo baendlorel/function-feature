@@ -67,8 +67,8 @@ void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
 }
 
 void GetFunctionFeatures(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.Length() != 1) {
-    Throws(info, "Expected exactly 1 argument");
+  if (info.Length() < 1) {
+    Throws(info, "Expected at least 1 argument");
     return;
   }
 
@@ -86,8 +86,8 @@ void GetFunctionFeatures(const v8::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void GetBoundFunction(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.Length() != 1) {
-    Throws(info, "Expected exactly 1 argument");
+  if (info.Length() < 1) {
+    Throws(info, "Expected at least 1 argument");
     return;
   }
 
@@ -104,8 +104,8 @@ void GetBoundFunction(const v8::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void SetFunctionName(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.Length() != 2) {
-    Throws(info, "Expected 2 arguments: function, name");
+  if (info.Length() < 2) {
+    Throws(info, "Expected at least 2 arguments: function, name");
     return;
   }
   if (!info[0]->IsFunction()) {
@@ -124,10 +124,29 @@ void SetFunctionName(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(fn);
 }
 
+void FunctionProtoToString(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  if (info.Length() < 1) {
+    Throws(info, "Expected at least 1 argument");
+    return;
+  }
+
+  if (!info[0]->IsFunction()) {
+    Throws(info, "Argument must be a function");
+    return;
+  }
+  v8::Local<v8::Value> arg0 = info[0];
+  LFun fn = LFun::Cast(arg0);
+  v8Iso isolate = info.GetIsolate();
+  LCtx ctx = isolate->GetCurrentContext();
+  LStr str = fn->FunctionProtoToString(ctx).ToLocalChecked();
+  info.GetReturnValue().Set(str);
+}
+
 void Init(v8::Local<v8::Object> target) {
-  SetFn(target, "getFunctionFeatures", GetFunctionFeatures);
-  SetFn(target, "getBoundFunction", GetBoundFunction);
-  SetFn(target, "setFunctionName", SetFunctionName);
+  SetFn(target, "getFeatures", GetFunctionFeatures);
+  SetFn(target, "getBound", GetBoundFunction);
+  SetFn(target, "setName", SetFunctionName);
+  SetFn(target, "functionProtoToString", FunctionProtoToString);
 }
 
 NODE_MODULE(function_feature, Init)

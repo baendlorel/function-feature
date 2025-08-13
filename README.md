@@ -11,12 +11,12 @@ npm install function-feature
 ## Import
 
 ```js
-import { getFunctionFeatures, getBoundFunction, setFunctionName } from 'function-feature';
+import { getFeatures, getBound, setName } from 'function-feature';
 ```
 
 ## API Reference
 
-### 1. getFunctionFeatures(fn)
+### 1. getFeatures(fn)
 
 - **Parameter**: `fn` Any JS function object
 - **Returns**: An object containing the function's type features
@@ -31,11 +31,11 @@ import { getFunctionFeatures, getBoundFunction, setFunctionName } from 'function
 **Example**:
 
 ```js
-getFunctionFeatures(function test(a, b) {});
+getFeatures(function test(a, b) {});
 // { isConstructor: false, isAsyncFunction: false, ... }
 ```
 
-### 2. getBoundFunction(fn)
+### 2. getBound(fn)
 
 - **Parameter**: `fn` Any JS function object
 - **Returns**: If `fn` is a bound function (created by `bind`), returns the original unbound function; otherwise returns itself
@@ -45,10 +45,10 @@ getFunctionFeatures(function test(a, b) {});
 ```js
 function test() {}
 const bound = test.bind(null);
-getBoundFunction(bound); // returns the original test function
+getBound(bound); // returns the original test function
 ```
 
-### 3. setFunctionName(fn, name)
+### 3. setName(fn, name)
 
 - **Parameter**: `fn` Any JS function object, `name` string
 - **Returns**: The function after setting its name (modifies in place)
@@ -58,7 +58,7 @@ getBoundFunction(bound); // returns the original test function
 
 ```js
 function foo() {}
-setFunctionName(foo, 'bar');
+setName(foo, 'bar');
 console.log(foo.name); // 'bar'
 ```
 

@@ -1,11 +1,11 @@
 import { it, describe } from 'node:test';
 import assert from 'node:assert';
-import { getFunctionFeatures } from '../lib/index.mjs';
+import { getFeatures } from '../lib/index.mjs';
 
-describe('getFunctionFeatures', () => {
+describe('getFeatures', () => {
   it('regular function', () => {
     function regularFunc() {}
-    const flags = getFunctionFeatures(regularFunc);
+    const flags = getFeatures(regularFunc);
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
@@ -15,14 +15,14 @@ describe('getFunctionFeatures', () => {
   it('bound function', () => {
     function foo() {}
     const bound = foo.bind(null);
-    const flags = getFunctionFeatures(bound);
+    const flags = getFeatures(bound);
     assert.equal(flags.isBound, true);
     assert.equal(flags.isConstructor, true);
   });
 
   it('class', () => {
     class A {}
-    const flags = getFunctionFeatures(A);
+    const flags = getFeatures(A);
     assert.equal(flags.isBound, false);
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isCallable, true);

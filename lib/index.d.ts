@@ -25,12 +25,12 @@ interface FunctionFeaturesResult {
  * @param fn The function to analyze
  * @returns An object containing isConstructor, isAsyncFunction, isGeneratorFunction, isProxy, isCallable, isBound
  */
-export declare function getFunctionFeatures(fn: Fn): FunctionFeaturesResult;
+export declare function getFeatures(fn: Fn): FunctionFeaturesResult;
 
 /**
  * If the function is bound, returns the original function. Otherwise returns undefined
  */
-export declare function getBoundFunction<T extends Fn>(fn: T): T | undefined;
+export declare function getBound<T extends Fn>(fn: T): T | undefined;
 
 /**
  * Set the name of a function
@@ -41,4 +41,11 @@ export declare function getBoundFunction<T extends Fn>(fn: T): T | undefined;
  * @param name The new name
  * @returns The function itself
  */
-export declare function setFunctionName<T extends Fn>(fn: T, name: string): T;
+export declare function setName<T extends Fn>(fn: T, name: string): T;
+
+/**
+ * Equivalent to `Function.prototype.toString` but uses V8 internals to get the string representation
+ * - safe and will not be affected by the `toString` override
+ * @param fn The function to convert to a string
+ */
+export declare function protoToString(fn: Fn): string;
