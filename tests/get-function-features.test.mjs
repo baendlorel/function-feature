@@ -19,4 +19,12 @@ describe('getFunctionFeatures', () => {
     assert.equal(flags.isBound, true);
     assert.equal(flags.isConstructor, true);
   });
+
+  it('class', () => {
+    class A {}
+    const flags = getFunctionFeatures(A);
+    assert.equal(flags.isBound, false);
+    assert.equal(flags.isConstructor, true);
+    assert.equal(flags.isCallable, true);
+  });
 });
