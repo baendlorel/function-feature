@@ -6,6 +6,7 @@ describe('getFunctionFeatures', () => {
   it('regular function', () => {
     function regularFunc() {}
     const flags = getFunctionFeatures(regularFunc);
+    console.log('flags', flags);
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
