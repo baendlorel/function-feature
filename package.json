@@ -52,6 +52,7 @@
     "prebuild-install": "^7.1.3"
   },
   "devDependencies": {
+    "function-feature": "^0.0.2",
     "node-gyp": "^10.0.0",
     "prebuildify": "^6.0.1"
   },
