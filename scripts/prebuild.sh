@@ -19,8 +19,7 @@ echo "Current node version: $current_nvm"
 # 清理之前的预编译文件
 rm -rf prebuilds/
 
-# 支持的 Node 版本列表 (跳过 Node 16和24，因为兼容性问题)
-NODE_VERSIONS=(18 20 22)
+NODE_VERSIONS=(16 18 20 22 24)
 
 echo "Building for Node versions: ${NODE_VERSIONS[@]}"
 

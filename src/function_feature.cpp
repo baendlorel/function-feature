@@ -1,6 +1,7 @@
 #include <nan.h>
+#include <v8-exception.h>
+#include <v8-isolate.h>
 #include <v8.h>
-
 using namespace Nan;
 
 namespace function_feature {
@@ -45,14 +46,21 @@ LObj GetFeatures(LFun fn, v8Iso isolate) {
   return scope.Escape(result);
 }
 
-NAN_METHOD(GetFunctionFeatures) {
+void Throws(const FunctionCallbackInfo<v8::Value>& info, const char* msg) {
+  info.GetIsolate()->ThrowException(v8::Exception::TypeError(
+      v8::String::NewFromUtf8(info.GetIsolate(), msg,
+                              v8::NewStringType::kNormal)
+          .ToLocalChecked()));
+}
+
+void GetFunctionFeatures(const FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() != 1) {
-    Nan::ThrowTypeError("Expected exactly 1 argument");
+    Throws(info, "Expected exactly 1 argument");
     return;
   }
 
   if (!info[0]->IsFunction()) {
-    Nan::ThrowTypeError("Argument must be a function");
+    Throws(info, "Argument must be a function");
     return;
   }
 
@@ -63,14 +71,14 @@ NAN_METHOD(GetFunctionFeatures) {
   info.GetReturnValue().Set(result);
 }
 
-NAN_METHOD(GetBoundFunction) {
+void GetBoundFunction(const FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() != 1) {
-    Nan::ThrowTypeError("Expected exactly 1 argument");
+    Throws(info, "Expected exactly 1 argument");
     return;
   }
 
   if (!info[0]->IsFunction()) {
-    Nan::ThrowTypeError("Argument must be a function");
+    Throws(info, "Argument must be a function");
     return;
   }
 
@@ -80,18 +88,17 @@ NAN_METHOD(GetBoundFunction) {
   info.GetReturnValue().Set(bound);
 }
 
-// NAN method: setFunctionName
-NAN_METHOD(SetFunctionName) {
+void SetFunctionName(const FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() != 2) {
-    Nan::ThrowTypeError("Expected 2 arguments: function, name");
+    Throws(info, "Expected 2 arguments: function, name");
     return;
   }
   if (!info[0]->IsFunction()) {
-    Nan::ThrowTypeError("First argument must be a function");
+    Throws(info, "First argument must be a function");
     return;
   }
   if (!info[1]->IsString()) {
-    Nan::ThrowTypeError("Second argument must be a string");
+    Throws(info, "Second argument must be a string");
     return;
   }
   LFun fn = LFun::Cast(info[0]);
