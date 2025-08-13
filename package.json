@@ -6,12 +6,10 @@
     "name": "KasukabeTsumugi",
     "email": "futami16237@gmail.com"
   },
-  "exports": {
-    "import": "./dist/index.mjs",
-    "types": "./dist/index.d.ts"
-  },
+  "main": "lib/index.mjs",
+  "types": "lib/index.d.ts",
   "files": [
-    "dist",
+    "lib",
     "prebuilds",
     "binding.gyp",
     "src"
@@ -20,9 +18,9 @@
     "build": "node-gyp rebuild",
     "test": "./scripts/test.sh",
     "clean": "node-gyp clean",
-    "rebuild": "pnpm run clean && pnpm run build",
+    "rebuild": "node-gyp clean && node-gyp rebuild",
     "prebuild": "./scripts/prebuild.sh",
-    "postinstall": "prebuild-install || pnpm run rebuild"
+    "postinstall": "prebuild-install || node-gyp rebuild"
   },
   "keywords": [
     "function",

@@ -1,6 +1,7 @@
 .vscode/settings.json
 logs
 
+prebuilds
 
 # Node.js
 node_modules/

@@ -1,8 +1,16 @@
 #!/bin/bash
 
 # 多版本预编译脚本
+set -e  # 遇到错误立即退出
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# 检查 nvm 是否可用
+if ! command -v nvm &> /dev/null; then
+    echo "Error: nvm is not available"
+    exit 1
+fi
 
 # 记录当前版本
 current_nvm=$(nvm current)
@@ -11,10 +19,18 @@ echo "Current node version: $current_nvm"
 # 清理之前的预编译文件
 rm -rf prebuilds/
 
-# 支持的 Node 版本列表 (跳过 Node 16，因为 pnpm 不支持)
-NODE_VERSIONS=(18 20 22 24)
+# 支持的 Node 版本列表 (跳过 Node 16和24，因为兼容性问题)
+NODE_VERSIONS=(18 20 22)
 
 echo "Building for Node versions: ${NODE_VERSIONS[@]}"
+
+# 检查并安装缺失的 Node 版本
+for version in "${NODE_VERSIONS[@]}"; do
+  if ! nvm list | grep -q "v$version"; then
+    echo "Installing Node $version..."
+    nvm install $version
+  fi
+done
 
 for version in "${NODE_VERSIONS[@]}"; do
   echo "================================"
@@ -24,18 +40,37 @@ for version in "${NODE_VERSIONS[@]}"; do
   # 切换到指定版本
   nvm use $version
   if [ $? -ne 0 ]; then
-    echo "Warning: Node $version not installed, skipping..."
+    echo "Error: Failed to switch to Node $version"
     continue
   fi
   
-  # 直接调用 node-gyp，避免递归
-  node-gyp clean
-  node-gyp rebuild
+  # 获取完整的版本号
+  FULL_VERSION=$(node --version | sed 's/v//')
+  echo "Using Node version: $FULL_VERSION"
+  echo "Using pnpm version: $(pnpm --version)"
+  
+  # 清理并重新编译
+  echo "Cleaning previous build..."
+  npx node-gyp clean
+  
+  echo "Building native module..."
+  npx node-gyp rebuild
+  
+  if [ $? -ne 0 ]; then
+    echo "Error: Build failed for Node $version"
+    continue
+  fi
   
   # 使用 prebuildify 打包
-  npx prebuildify --napi=false --strip
+  echo "Creating prebuild..."
+  pnpm exec prebuildify --napi=false --strip --target node@$FULL_VERSION
   
-  echo "Completed build for Node $version"
+  if [ $? -ne 0 ]; then
+    echo "Error: Prebuildify failed for Node $version"
+    continue
+  fi
+  
+  echo "Successfully completed build for Node $version"
 done
 
 echo "================================"
@@ -46,4 +81,17 @@ echo "Restoring to original Node version..."
 nvm use $current_nvm
 
 echo "Prebuilt binaries saved in prebuilds/ directory"
-ls -la prebuilds/
+if [ -d "prebuilds" ]; then
+  ls -la prebuilds/
+else
+  echo "Warning: prebuilds directory not found"
+fi
+
+echo "Build summary:"
+for version in "${NODE_VERSIONS[@]}"; do
+  if [ -d "prebuilds/linux-x64-node-$version" ] || [ -d "prebuilds/*-node-$version" ]; then
+    echo "✓ Node $version: Success"
+  else
+    echo "✗ Node $version: Failed"
+  fi
+done
