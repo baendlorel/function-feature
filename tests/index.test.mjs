@@ -1,195 +1,193 @@
 import { it, describe } from 'node:test';
 import assert from 'node:assert';
 
-import { getFunctionKind } from '../lib/index.mjs';
+import { getFunctionFeatures, getBoundFunction } from '../lib/index.mjs';
 
-describe('getFunctionKind', () => {
+describe('getFunctionFeatures', () => {
   it('regular function', () => {
     function regularFunc() {}
-    const flags = getFunctionKind(regularFunc);
+    const flags = getFunctionFeatures(regularFunc);
 
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, false);
   });
 
   it('arrow function', () => {
     const arrowFunc = () => {};
-    const flags = getFunctionKind(arrowFunc);
+    const flags = getFunctionFeatures(arrowFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, true);
   });
 
   it('async function', () => {
     async function asyncFunc() {}
-    const flags = getFunctionKind(asyncFunc);
+    const flags = getFunctionFeatures(asyncFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, true);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('async arrow function', () => {
     const asyncArrowFunc = async () => {};
-    const flags = getFunctionKind(asyncArrowFunc);
+    const flags = getFunctionFeatures(asyncArrowFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, true);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('generator function', () => {
     function* generatorFunc() {}
-    const flags = getFunctionKind(generatorFunc);
+    const flags = getFunctionFeatures(generatorFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, true);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('async generator function', () => {
     async function* asyncGeneratorFunc() {}
-    const flags = getFunctionKind(asyncGeneratorFunc);
+    const flags = getFunctionFeatures(asyncGeneratorFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, true);
     assert.equal(flags.isGeneratorFunction, true);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('class constructor', () => {
     class TestClass {}
-    const flags = getFunctionKind(TestClass);
+    const flags = getFunctionFeatures(TestClass);
 
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, false);
   });
 
   it('bound function', () => {
     function originalFunc() {}
     const boundFunc = originalFunc.bind(null);
-    const flags = getFunctionKind(boundFunc);
+    const flags = getFunctionFeatures(boundFunc);
 
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, false);
   });
 
   it('bound arrow function', () => {
     const originalArrowFunc = () => {};
     const boundArrowFunc = originalArrowFunc.bind(null);
-    const flags = getFunctionKind(boundArrowFunc);
+    const flags = getFunctionFeatures(boundArrowFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, true);
   });
 
   it('bound async function', () => {
     async function originalAsyncFunc() {}
     const boundAsyncFunc = originalAsyncFunc.bind(null);
-    const flags = getFunctionKind(boundAsyncFunc);
+    const flags = getFunctionFeatures(boundAsyncFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('bound generator function', () => {
     function* originalGeneratorFunc() {}
     const boundGeneratorFunc = originalGeneratorFunc.bind(null);
-    const flags = getFunctionKind(boundGeneratorFunc);
+    const flags = getFunctionFeatures(boundGeneratorFunc);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('bound class constructor', () => {
     class TestClass {}
     const boundClass = TestClass.bind(null);
-    const flags = getFunctionKind(boundClass);
+    const flags = getFunctionFeatures(boundClass);
 
     assert.equal(flags.isConstructor, true);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, false);
   });
 
   it('native function', () => {
-    const flags = getFunctionKind(Array.isArray);
+    const flags = getFunctionFeatures(Array.isArray);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, false);
   });
 
   it('method function', () => {
     const obj = {
       method() {},
     };
-    const flags = getFunctionKind(obj.method);
+    const flags = getFunctionFeatures(obj.method);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, false);
-    // fixme 成员函数也不能new！
-    assert.equal(flags.isArrowFunction, false);
   });
 
   it('async method function', () => {
     const obj = {
       async method() {},
     };
-    const flags = getFunctionKind(obj.method);
+    const flags = getFunctionFeatures(obj.method);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, true);
     assert.equal(flags.isGeneratorFunction, false);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('generator method function', () => {
     const obj = {
       *method() {},
     };
-    const flags = getFunctionKind(obj.method);
+    const flags = getFunctionFeatures(obj.method);
 
     assert.equal(flags.isConstructor, false);
     assert.equal(flags.isAsyncFunction, false);
     assert.equal(flags.isGeneratorFunction, true);
-    assert.equal(flags.isArrowFunction, null);
   });
 
   it('error handling - non-function input', () => {
     assert.throws(() => {
-      getFunctionKind('not a function');
+      getFunctionFeatures('not a function');
     }, TypeError);
 
     assert.throws(() => {
-      getFunctionKind(null);
+      getFunctionFeatures(null);
     }, TypeError);
 
     assert.throws(() => {
-      getFunctionKind(undefined);
+      getFunctionFeatures(undefined);
     }, TypeError);
 
     assert.throws(() => {
-      getFunctionKind(123);
+      getFunctionFeatures(123);
     }, TypeError);
+  });
+});
+
+describe('getBoundFunction', () => {
+  it('returns original function for bound', () => {
+    function foo() {}
+    const bound = foo.bind(null);
+    const orig = getBoundFunction(bound);
+    assert.equal(orig, foo);
+  });
+
+  it('returns undefined for non-bound', () => {
+    function bar() {}
+    const orig = getBoundFunction(bar);
+    assert.equal(orig, undefined);
   });
 });

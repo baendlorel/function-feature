@@ -5,42 +5,38 @@
 using namespace Nan;
 
 namespace function_feature {
+typedef v8::Local<v8::Context> LCtx;
+typedef v8::Local<v8::Function> LFun;
+typedef v8::Local<v8::String> LStr;
+typedef v8::Local<v8::Object> LObj;
+typedef v8::Isolate* v8Iso;
 
-// bool IsArrowFunction(v8::Local<v8::Function> func) {
-//   v8::Function* v8Func = v8::Function::Cast(*func);
-//   return v8Func.;  // 需要 V8 调试符号
-// }GetBoundFunction()
+void Set(v8Iso isolate, LObj result, LCtx context, const char* k, bool v) {
+  auto raw = v8::String::NewFromUtf8(isolate, k, v8::NewStringType::kNormal);
+  LStr key = raw.ToLocalChecked();
 
-void Set(v8::Isolate* isolate,
-         v8::Local<v8::Object> result,
-         v8::Local<v8::Context> context,
-         const char* key,
-         bool value) {
-  v8::Local<v8::String> v8_key =
-      v8::String::NewFromUtf8(isolate, key, v8::NewStringType::kNormal)
-          .ToLocalChecked();
-  v8::Local<v8::Boolean> v8_value = v8::Boolean::New(isolate, key);
-  result->Set(context, v8_key, v8_value).Check();
+  v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, k);
+
+  result->Set(context, key, value).Check();
 }
 
-// Get V8 function type flags
-v8::Local<v8::Object> GetFunctionKind(v8::Local<v8::Function> fn,
-                                      v8::Isolate* islt) {
-  v8::EscapableHandleScope scope(islt);
-  v8::Local<v8::Context> ctx = islt->GetCurrentContext();
-  v8::Local<v8::Object> result = v8::Object::New(islt);
+// Get V8 function feature flags
+LObj GetFeatures(LFun fn, v8Iso isolate) {
+  v8::EscapableHandleScope scope(isolate);
+  LCtx ctx = isolate->GetCurrentContext();
+  LObj result = v8::Object::New(isolate);
 
-  Set(islt, result, ctx, "isConstructor", fn->IsConstructor());
-  Set(islt, result, ctx, "isAsyncFunction", fn->IsAsyncFunction());
-  Set(islt, result, ctx, "isGeneratorFunction", fn->IsGeneratorFunction());
-  Set(islt, result, ctx, "isProxy", fn->IsProxy());
-  Set(islt, result, ctx, "isCallable", fn->IsCallable());
+  Set(isolate, result, ctx, "isConstructor", fn->IsConstructor());
+  Set(isolate, result, ctx, "isAsyncFunction", fn->IsAsyncFunction());
+  Set(isolate, result, ctx, "isGeneratorFunction", fn->IsGeneratorFunction());
+  Set(isolate, result, ctx, "isProxy", fn->IsProxy());
+  Set(isolate, result, ctx, "isCallable", fn->IsCallable());
+  Set(isolate, result, ctx, "isBound", fn->GetBoundFunction()->IsFunction());
 
   return scope.Escape(result);
 }
 
-// NAN method: getFunctionKind
-NAN_METHOD(GetFunctionKind) {
+NAN_METHOD(GetFunctionFeatures) {
   if (info.Length() != 1) {
     Nan::ThrowTypeError("Expected exactly 1 argument");
     return;
@@ -51,17 +47,37 @@ NAN_METHOD(GetFunctionKind) {
     return;
   }
 
-  v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(info[0]);
-  v8::Isolate* isolate = info.GetIsolate();
+  LFun func = LFun::Cast(info[0]);
+  v8Iso isolate = info.GetIsolate();
 
-  v8::Local<v8::Object> result = GetFunctionKind(func, isolate);
+  LObj result = GetFeatures(func, isolate);
   info.GetReturnValue().Set(result);
+}
+
+// NAN method: getBoundFunction
+NAN_METHOD(GetBoundFunction) {
+  if (info.Length() != 1) {
+    Nan::ThrowTypeError("Expected exactly 1 argument");
+    return;
+  }
+
+  if (!info[0]->IsFunction()) {
+    Nan::ThrowTypeError("Argument must be a function");
+    return;
+  }
+
+  LFun func = LFun::Cast(info[0]);
+  v8::Local<v8::Value> bound = func->GetBoundFunction();
+  info.GetReturnValue().Set(bound);
 }
 
 // Module initialization
 NAN_MODULE_INIT(Init) {
-  Nan::Set(target, Nan::New("getFunctionKind").ToLocalChecked(),
-           Nan::GetFunction(Nan::New<v8::FunctionTemplate>(GetFunctionKind))
+  Nan::Set(target, Nan::New("getFunctionFeatures").ToLocalChecked(),
+           Nan::GetFunction(Nan::New<v8::FunctionTemplate>(GetFunctionFeatures))
+               .ToLocalChecked());
+  Nan::Set(target, Nan::New("getBoundFunction").ToLocalChecked(),
+           Nan::GetFunction(Nan::New<v8::FunctionTemplate>(GetBoundFunction))
                .ToLocalChecked());
 }
 
