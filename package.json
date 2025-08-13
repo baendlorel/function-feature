@@ -1,7 +1,7 @@
 {
-  "name": "function-kind",
+  "name": "function-feature",
   "version": "1.0.0",
-  "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction) using native V8 APIs",
+  "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction) or other features using native V8 APIs",
   "author": {
     "name": "KasukabeTsumugi",
     "email": "futami16237@gmail.com"
@@ -37,12 +37,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/baendlorel/function-kind.git"
+    "url": "https://github.com/baendlorel/function-feature.git"
   },
   "bugs": {
-    "url": "https://github.com/baendlorel/function-kind/issues"
+    "url": "https://github.com/baendlorel/function-feature/issues"
   },
-  "homepage": "https://github.com/baendlorel/function-kind#readme",
+  "homepage": "https://github.com/baendlorel/function-feature#readme",
   "dependencies": {
     "nan": "^2.17.0"
   },

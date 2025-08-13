@@ -1,9 +1,9 @@
 {
   "targets": [
     {
-      "target_name": "function_kind",
+      "target_name": "function_feature",
       "sources": [
-        "src/function_kind.cpp"
+        "src/function_feature.cpp"
       ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")"

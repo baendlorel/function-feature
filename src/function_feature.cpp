@@ -4,12 +4,12 @@
 
 using namespace Nan;
 
-namespace function_kind {
+namespace function_feature {
 
 // bool IsArrowFunction(v8::Local<v8::Function> func) {
 //   v8::Function* v8Func = v8::Function::Cast(*func);
 //   return v8Func.;  // 需要 V8 调试符号
-// }
+// }GetBoundFunction()
 
 void Set(v8::Isolate* isolate,
          v8::Local<v8::Object> result,
@@ -34,6 +34,7 @@ v8::Local<v8::Object> GetFunctionKind(v8::Local<v8::Function> fn,
   Set(islt, result, ctx, "isAsyncFunction", fn->IsAsyncFunction());
   Set(islt, result, ctx, "isGeneratorFunction", fn->IsGeneratorFunction());
   Set(islt, result, ctx, "isProxy", fn->IsProxy());
+  Set(islt, result, ctx, "isCallable", fn->IsCallable());
 
   return scope.Escape(result);
 }
@@ -64,6 +65,6 @@ NAN_MODULE_INIT(Init) {
                .ToLocalChecked());
 }
 
-NODE_MODULE(function_kind, Init)
+NODE_MODULE(function_feature, Init)
 
-}  // namespace function_kind
+}  // namespace function_feature
