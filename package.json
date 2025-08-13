@@ -7,18 +7,15 @@
     "email": "futami16237@gmail.com"
   },
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+    "import": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "node-gyp rebuild",
-    "test": "node tests/index.test.js",
+    "test": "node tests/index.test.mjs",
     "clean": "node-gyp clean",
     "rebuild": "npm run clean && npm run build"
   },
