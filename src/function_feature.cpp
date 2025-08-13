@@ -1,5 +1,4 @@
 #include <nan.h>
-#include <v8-function.h>
 #include <v8.h>
 
 using namespace Nan;
@@ -12,12 +11,18 @@ typedef v8::Local<v8::Object> LObj;
 typedef v8::Isolate* v8Iso;
 
 void Set(v8Iso isolate, LObj result, LCtx context, const char* k, bool v) {
-  auto raw = v8::String::NewFromUtf8(isolate, k, v8::NewStringType::kNormal);
-  LStr key = raw.ToLocalChecked();
+  v8::HandleScope scope(isolate);
+
+  v8::MaybeLocal<v8::String> maybe_key =
+      v8::String::NewFromUtf8(isolate, k, v8::NewStringType::kNormal);
+  v8::Local<v8::String> key;
+  if (!maybe_key.ToLocal(&key)) {
+    return;
+  }
 
   v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, v);
-
-  result->Set(context, key, value).Check();
+  auto maybe_result = result->Set(context, key, value);
+  maybe_result.Check();
 }
 
 // Get V8 function feature flags
@@ -31,7 +36,11 @@ LObj GetFeatures(LFun fn, v8Iso isolate) {
   Set(isolate, result, ctx, "isGeneratorFunction", fn->IsGeneratorFunction());
   Set(isolate, result, ctx, "isProxy", fn->IsProxy());
   Set(isolate, result, ctx, "isCallable", fn->IsCallable());
-  Set(isolate, result, ctx, "isBound", fn->GetBoundFunction()->IsFunction());
+
+  bool isBound = false;
+  v8::Local<v8::Value> boundFn = fn->GetBoundFunction();
+  isBound = !boundFn->IsUndefined();
+  Set(isolate, result, ctx, "isBound", isBound);
 
   return scope.Escape(result);
 }
@@ -66,6 +75,7 @@ NAN_METHOD(GetBoundFunction) {
   }
 
   LFun func = LFun::Cast(info[0]);
+
   v8::Local<v8::Value> bound = func->GetBoundFunction();
   info.GetReturnValue().Set(bound);
 }
