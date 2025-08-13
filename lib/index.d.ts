@@ -10,7 +10,7 @@ type Fn = (...args: unknown[]) => unknown;
  * - isCallable: `true` if the function is callable
  * - isBound: `true` if the function is a bound function (created by Function.prototype.bind)
  */
-export interface FunctionFeaturesResult {
+interface FunctionFeaturesResult {
   isConstructor: boolean;
   isAsyncFunction: boolean;
   isGeneratorFunction: boolean;
