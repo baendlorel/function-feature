@@ -55,20 +55,25 @@ typedef v8::Local<v8::Value> LVal;
 typedef v8::Local<v8::Proxy> LPxy;
 typedef v8::Local<v8::Function> LFun;
 typedef v8::Local<v8::String> LStr;
+typedef v8::Local<v8::Symbol> LSym;
 typedef v8::MaybeLocal<v8::String> MStr;
 typedef v8::Local<v8::Object> LObj;
 constexpr auto STR_TYPE = v8::NewStringType::kNormal;
 
 // #region Utils
+inline LStr _String(Isol isolate, const char* str) {
+  return v8::String::NewFromUtf8(isolate, str, STR_TYPE).ToLocalChecked();
+}
+
 inline void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
   Isol isolate = info.GetIsolate();
-  MStr maybe_msg = v8::String::NewFromUtf8(info.GetIsolate(), msg, STR_TYPE);
+  MStr maybe_msg = _String(info.GetIsolate(), msg);
   LVal err = v8::Exception::TypeError(maybe_msg.ToLocalChecked());
   isolate->ThrowException(err);
 }
 
 inline LVal _ToKey(Isol isolate, const char* k) {
-  MStr maybe_key = v8::String::NewFromUtf8(isolate, k, STR_TYPE);
+  MStr maybe_key = _String(isolate, k);
   LStr key;
   if (!maybe_key.ToLocal(&key)) {
     return key;  // Return an empty Local<String> if conversion fails
@@ -91,17 +96,15 @@ void _Set(LObj result, const char* k, T v) {
   } else if constexpr (std::is_same_v<T, double> || std::is_same_v<T, float>) {
     value = v8::Number::New(isolate, v);
   } else if constexpr (std::is_same_v<T, const char*>) {
-    value = v8::String::NewFromUtf8(isolate, v, STR_TYPE).ToLocalChecked();
+    value = _String(isolate, v);
   } else if constexpr (std::is_same_v<T, std::string>) {
-    value =
-        v8::String::NewFromUtf8(isolate, v.c_str(), STR_TYPE).ToLocalChecked();
+    value = _String(isolate, v.c_str());
   } else if constexpr (std::is_same_v<T, LVal>) {
     value = v;
   } else {
     // 其它类型直接转为字符串
     std::string s = std::to_string(v);
-    value =
-        v8::String::NewFromUtf8(isolate, s.c_str(), STR_TYPE).ToLocalChecked();
+    value = _String(isolate, s.c_str(), STR_TYPE);
   }
 
   auto maybe_result = result->Set(ctx, key, value);
@@ -318,12 +321,12 @@ void GetOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  if (!info[0]->IsFunction()) {
+  LVal arg0 = info[0];
+  if (!arg0->IsObject() && !arg0->IsFunction()) {
     Throws(info, "Argument must be a function");
     return;
   }
 
-  LVal arg0 = info[0];
   LFun func = LFun::Cast(arg0);
   Isol isolate = info.GetIsolate();
 
@@ -336,23 +339,39 @@ void SetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
     Throws(info, "Expected at least 2 arguments: function, name");
     return;
   }
-  if (!info[0]->IsFunction()) {
+
+  LVal arg0 = info[0];
+  LVal arg1 = info[1];
+
+  if (!arg0->IsFunction()) {
     Throws(info, "First argument must be a function");
     return;
   }
-  if (!info[1]->IsString()) {
-    Throws(info, "Second argument must be a string");
+
+  if (!arg1->IsString() && !arg1->IsSymbol()) {
+    Throws(info, "Second argument must be a string or symbol");
     return;
   }
-  LVal arg0 = info[0];
+
   LFun fn = LFun::Cast(arg0);
   Isol isolate = info.GetIsolate();
-  LStr name = info[1].As<v8::String>();
 
-  // Check if this is a native constructor before trying to set name
-  if (_IsNativeConstructor(isolate, fn)) {
-    Throws(info, "Cannot set name on native constructor");
-    return;
+  LStr name;
+  if (arg1->IsSymbol()) {
+    LSym sym = LSym::Cast(arg1);
+    LStr desc = sym->Description(isolate);
+    std::string s;
+    if (desc->IsString()) {
+      v8::String::Utf8Value utf8(isolate, desc);
+      s = "[";
+      s += *utf8;
+      s += "]";
+    } else {
+      s = "";
+    }
+    name = _String(isolate, s.c_str());
+  } else {
+    name = LStr::Cast(arg1);
   }
 
   fn->SetName(name);
