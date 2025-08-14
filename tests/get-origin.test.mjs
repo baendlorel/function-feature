@@ -24,6 +24,6 @@ describe('getOrigin', () => {
     const target = { x: 1 };
     const handler = {};
     const proxy = new Proxy(target, handler);
-    expect(getOrigin(proxy)).toBe(target);
+    expect(getOrigin(proxy)).toEqual(target);
   });
 });

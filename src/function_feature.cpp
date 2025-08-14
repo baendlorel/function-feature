@@ -58,6 +58,7 @@ typedef v8::Local<v8::String> LStr;
 typedef v8::Local<v8::Symbol> LSym;
 typedef v8::MaybeLocal<v8::String> MStr;
 typedef v8::Local<v8::Object> LObj;
+typedef v8::Local<v8::Array> LArr;
 constexpr auto STR_TYPE = v8::NewStringType::kNormal;
 
 // #region Utils
@@ -92,6 +93,20 @@ void _Set(LObj result, const char* k, T v) {
     value = _String(isolate, v.c_str());
   } else if constexpr (std::is_same_v<T, LVal>) {
     value = v;
+  } else if constexpr (std::is_same_v<T, LFun>) {
+    value = v;
+  } else if constexpr (std::is_same_v<T, LObj>) {
+    value = v;
+  } else if constexpr (std::is_same_v<T, LArr>) {
+    value = v;
+  } else if constexpr (std::is_same_v<T, LStr>) {
+    value = v;
+  } else if constexpr (std::is_same_v<T, LSym>) {
+    value = v;
+  } else if constexpr (std::is_same_v<T, FnCB>) {
+    // 处理函数回调类型
+    auto tpl = v8::FunctionTemplate::New(isolate, v);
+    value = tpl->GetFunction(ctx).ToLocalChecked();
   } else {
     value = _String(isolate, "unknown");
   }
