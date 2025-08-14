@@ -1,5 +1,4 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { getBound } from '../lib/index.mjs';
 
 describe('getBound', () => {
@@ -7,12 +6,12 @@ describe('getBound', () => {
     function bar() {}
     const bound1 = bar.bind(null);
     const bound2 = bound1.bind(null);
-    assert.equal(getBound(bound1), bar);
-    assert.notEqual(getBound(bound2), getBound(bound1));
+    expect(getBound(bound1)).toBe(bar);
+    expect(getBound(bound2)).not.toBe(getBound(bound1));
   });
 
   it('returns undefined for non-bound', () => {
     function baz() {}
-    assert.equal(getBound(baz), undefined);
+    expect(getBound(baz)).toBeUndefined();
   });
 });

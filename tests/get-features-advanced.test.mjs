@@ -1,5 +1,4 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { getFeatures } from '../lib/index.mjs';
 
 describe('getFeatures advanced', () => {
@@ -7,8 +6,8 @@ describe('getFeatures advanced', () => {
     function base() {}
     const proxy = new Proxy(base, {});
     const flags = getFeatures(proxy);
-    assert.equal(flags.isProxy, true);
-    assert.equal(flags.origin, base);
+    expect(flags.isProxy).toBe(true);
+    expect(flags.origin).toBe(base);
   });
 
   it('bound proxy function', () => {
@@ -16,15 +15,14 @@ describe('getFeatures advanced', () => {
     const proxy = new Proxy(base, {});
     const bound = proxy.bind(null);
     const flags = getFeatures(bound);
-    assert.equal(flags.isBound, true);
-    assert.equal(flags.isProxy, true);
-    assert.equal(flags.origin, base);
+    expect(flags.isBound).toBe(true);
+    expect(flags.isProxy).toBe(true);
+    expect(flags.origin).toBe(base);
   });
 
-  it('proxy object', () => {
+  it('proxy object throws', () => {
     const target = { x: 1 };
     const proxy = new Proxy(target, {});
-    // getFeatures should throw for non-function
-    assert.throws(() => getFeatures(proxy));
+    expect(() => getFeatures(proxy)).toThrow();
   });
 });

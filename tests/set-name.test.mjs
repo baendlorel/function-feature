@@ -1,12 +1,11 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { setName } from '../lib/index.mjs';
 
 describe('setName', () => {
   it('sets function name', () => {
     function fn() {}
     setName(fn, 'newName');
-    assert.equal(fn.name, 'newName');
+    expect(fn.name).toBe('newName');
   });
 
   it('sets function name with configurable = false', () => {
@@ -16,21 +15,21 @@ describe('setName', () => {
       configurable: false,
       writable: false,
     });
-    assert.equal(fn.name, 'cannotmodify');
+    expect(fn.name).toBe('cannotmodify');
     setName(fn, 'newName');
-    assert.equal(fn.name, 'cannotmodify');
+    expect(fn.name).toBe('cannotmodify');
   });
 
   it('sets name from symbol description', () => {
     function fn() {}
     setName(fn, Symbol('desc'));
-    assert.equal(fn.name, '[desc]');
+    expect(fn.name).toBe('[desc]');
   });
 
   it('sets name from symbol with undefined description', () => {
     function fn() {}
     const sym = Symbol();
     setName(fn, sym);
-    assert.equal(fn.name, '');
+    expect(fn.name).toBe('');
   });
 });

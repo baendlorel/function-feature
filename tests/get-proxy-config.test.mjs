@@ -1,5 +1,4 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { getProxyConfig } from '../lib/index.mjs';
 
 describe('getProxyConfig', () => {
@@ -8,8 +7,8 @@ describe('getProxyConfig', () => {
     const handler = { apply() {} };
     const proxy = new Proxy(base, handler);
     const info = getProxyConfig(proxy);
-    assert.equal(info.target, base);
-    assert.equal(info.handler, handler);
+    expect(info.target).toBe(base);
+    expect(info.handler).toBe(handler);
   });
 
   it('returns target and handler for proxy object', () => {
@@ -17,13 +16,13 @@ describe('getProxyConfig', () => {
     const handler = { get() {} };
     const proxy = new Proxy(target, handler);
     const info = getProxyConfig(proxy);
-    assert.equal(info.target, target);
-    assert.equal(info.handler, handler);
+    expect(info.target).toBe(target);
+    expect(info.handler).toBe(handler);
   });
 
   it('returns undefined for non-proxy', () => {
     function foo() {}
-    assert.equal(getProxyConfig(foo), undefined);
-    assert.equal(getProxyConfig({}), undefined);
+    expect(getProxyConfig(foo)).toBeUndefined();
+    expect(getProxyConfig({})).toBeUndefined();
   });
 });

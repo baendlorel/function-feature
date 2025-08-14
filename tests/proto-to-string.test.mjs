@@ -1,24 +1,23 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { protoToString } from '../lib/index.mjs';
 
 describe('protoToString', () => {
   it('returns native toString for function', () => {
     function foo() {}
     const str = protoToString(foo);
-    assert.ok(str.startsWith('function foo'));
+    expect(str.startsWith('function foo')).toBe(true);
   });
 
   it('returns native toString for class', () => {
     class Bar {}
     const str = protoToString(Bar);
-    assert.ok(str.startsWith('class Bar'));
+    expect(str.startsWith('class Bar')).toBe(true);
   });
 
   it('not affected by user override', () => {
     function baz() {}
     baz.toString = () => 'fake';
     const str = protoToString(baz);
-    assert.ok(str.startsWith('function baz'));
+    expect(str.startsWith('function baz')).toBe(true);
   });
 });

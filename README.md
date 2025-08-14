@@ -2,6 +2,8 @@
 
 High-performance V8 native function feature detection for Node.js. Supports Node.js 16/18/20/22/24, auto-loads prebuilt binaries, no Nan/N-API dependency required.
 
+> Note: Only works in Node.js environments. And prebuilds are only for linux.
+
 ## 📦 Installation
 
 ```bash

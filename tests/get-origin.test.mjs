@@ -1,5 +1,4 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { getOrigin } from '../lib/index.mjs';
 
 describe('getOrigin', () => {
@@ -7,24 +6,24 @@ describe('getOrigin', () => {
     function base() {}
     const proxy = new Proxy(base, {});
     const bound = proxy.bind(null);
-    assert.equal(getOrigin(bound), base);
-    assert.equal(getOrigin(proxy), base);
+    expect(getOrigin(bound)).toBe(base);
+    expect(getOrigin(proxy)).toBe(base);
   });
 
   it('returns itself for non-wrapped function', () => {
     function foo() {}
-    assert.equal(getOrigin(foo), foo);
+    expect(getOrigin(foo)).toBe(foo);
   });
 
   it('returns object itself if not proxy', () => {
     const obj = { a: 1 };
-    assert.equal(getOrigin(obj), obj);
+    expect(getOrigin(obj)).toBe(obj);
   });
 
   it('unwraps proxy object', () => {
     const target = { x: 1 };
     const handler = {};
     const proxy = new Proxy(target, handler);
-    assert.equal(getOrigin(proxy), target);
+    expect(getOrigin(proxy)).toBe(target);
   });
 });

@@ -1,59 +1,58 @@
-import { it, describe } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from 'vitest';
 import { isClass } from '../lib/index.mjs';
 
 describe('isClass', () => {
   it('should return true for class declarations', () => {
     class TestClass {}
-    assert.equal(isClass(TestClass), true);
+    expect(isClass(TestClass)).toBe(true);
   });
 
   it('should return true for class expressions', () => {
     const TestClass = class {};
-    assert.equal(isClass(TestClass), true);
+    expect(isClass(TestClass)).toBe(true);
   });
 
   it('should return true for native constructors', () => {
-    assert.equal(isClass(Array), true);
-    assert.equal(isClass(Object), true);
-    assert.equal(isClass(Function), true);
-    assert.equal(isClass(Boolean), true);
-    assert.equal(isClass(Number), true);
-    assert.equal(isClass(String), true);
-    assert.equal(isClass(Date), true);
-    assert.equal(isClass(RegExp), true);
-    assert.equal(isClass(Error), true);
+    expect(isClass(Array)).toBe(true);
+    expect(isClass(Object)).toBe(true);
+    expect(isClass(Function)).toBe(true);
+    expect(isClass(Boolean)).toBe(true);
+    expect(isClass(Number)).toBe(true);
+    expect(isClass(String)).toBe(true);
+    expect(isClass(Date)).toBe(true);
+    expect(isClass(RegExp)).toBe(true);
+    expect(isClass(Error)).toBe(true);
   });
 
   it('should return false for regular functions', () => {
     function regularFunction() {}
-    assert.equal(isClass(regularFunction), false);
+    expect(isClass(regularFunction)).toBe(false);
   });
 
   it('should return false for arrow functions', () => {
     const arrowFunction = () => {};
-    assert.equal(isClass(arrowFunction), false);
+    expect(isClass(arrowFunction)).toBe(false);
   });
 
   it('should return false for async functions', () => {
     async function asyncFunction() {}
-    assert.equal(isClass(asyncFunction), false);
+    expect(isClass(asyncFunction)).toBe(false);
   });
 
   it('should return false for generator functions', () => {
     function* generatorFunction() {}
-    assert.equal(isClass(generatorFunction), false);
+    expect(isClass(generatorFunction)).toBe(false);
   });
 
   it('should work with bound classes', () => {
     class TestClass {}
     const boundClass = TestClass.bind(null);
-    assert.equal(isClass(boundClass), true);
+    expect(isClass(boundClass)).toBe(true);
   });
 
   it('should work with bound functions', () => {
     function regularFunction() {}
     const boundFunction = regularFunction.bind(null);
-    assert.equal(isClass(boundFunction), false);
+    expect(isClass(boundFunction)).toBe(false);
   });
 });
