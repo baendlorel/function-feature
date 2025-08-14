@@ -76,6 +76,7 @@ export declare function getBound<T extends Fn>(fn: T): T | undefined;
 
 /**
  * Get the true origin function/object, tracing through bound and proxy wrappers
+ * - since there is no `[[BoundTargetFunction]]` in `object`, this method will only unwrap proxy of them
  * @param o The function/object to trace
  * @returns The original function/object (unwrapped)
  * @throws if `o` is not a function/object
