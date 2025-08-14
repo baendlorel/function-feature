@@ -19,7 +19,7 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "test": "./scripts/test.sh",
-    "t": "vitest",
+    "t": "clear && vitest",
     "clean": "node-gyp clean",
     "rebuild": "node-gyp clean && node-gyp rebuild",
     "prebuild": "./scripts/prebuild.sh",

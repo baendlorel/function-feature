@@ -72,20 +72,11 @@ inline void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
   isolate->ThrowException(err);
 }
 
-inline LVal _ToKey(Isol isolate, const char* k) {
-  MStr maybe_key = _String(isolate, k);
-  LStr key;
-  if (!maybe_key.ToLocal(&key)) {
-    return key;  // Return an empty Local<String> if conversion fails
-  }
-  return LVal::Cast(key);
-}
-
 template <typename T>
 void _Set(LObj result, const char* k, T v) {
   Isol isolate = result->GetIsolate();
   LCtx ctx = isolate->GetCurrentContext();
-  LVal key = _ToKey(isolate, k);
+  LVal key = _String(isolate, k);
 
   // 自动包装为 V8 Value
   LVal value;
@@ -102,9 +93,7 @@ void _Set(LObj result, const char* k, T v) {
   } else if constexpr (std::is_same_v<T, LVal>) {
     value = v;
   } else {
-    // 其它类型直接转为字符串
-    std::string s = std::to_string(v);
-    value = _String(isolate, s.c_str(), STR_TYPE);
+    value = _String(isolate, "unknown");
   }
 
   auto maybe_result = result->Set(ctx, key, value);
@@ -170,7 +159,7 @@ bool _IsNativeConstructor(Isol isolate, LFun func) {
       "Uint16Array", "Uint32Array",  "BigInt64Array", "BigUint64Array"};
 
   for (const char* name : native_constructors) {
-    LStr key = _ToKey(isolate, name);
+    LStr key = _String(isolate, name);
     v8::MaybeLocal<v8::Value> maybe_constructor = global->Get(ctx, key);
     LVal constructor_val;
     if (maybe_constructor.ToLocal(&constructor_val) &&
@@ -300,19 +289,17 @@ void GetProxyConfig(const v8::FunctionCallbackInfo<v8::Value>& info) {
   }
 
   Isol isolate = info.GetIsolate();
-  LVal result;
   if (arg0->IsProxy()) {
     LPxy proxy = LPxy::Cast(arg0);
     LVal proxyTarget = proxy->GetTarget();
     LVal proxyHandler = proxy->GetHandler();
-    result = v8::Object::New(isolate);
+    LObj result = v8::Object::New(isolate);
     _Set(result, "target", proxyTarget);
     _Set(result, "handler", proxyHandler);
+    info.GetReturnValue().Set(result);
   } else {
-    result = v8::Undefined(isolate);
+    info.GetReturnValue().Set(v8::Undefined(isolate));
   }
-
-  info.GetReturnValue().Set(result);
 }
 
 void GetOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
@@ -359,10 +346,11 @@ void SetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
   LStr name;
   if (arg1->IsSymbol()) {
     LSym sym = LSym::Cast(arg1);
-    LStr desc = sym->Description(isolate);
+    LVal desc = sym->Description(isolate);
     std::string s;
     if (desc->IsString()) {
-      v8::String::Utf8Value utf8(isolate, desc);
+      LStr desc_str = LStr::Cast(desc);
+      v8::String::Utf8Value utf8(isolate, desc_str);
       s = "[";
       s += *utf8;
       s += "]";
