@@ -1,6 +1,6 @@
 {
   "name": "function-feature",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction) or other features using native V8 APIs",
   "author": {
     "name": "KasukabeTsumugi",
@@ -8,7 +8,9 @@
   },
   "type": "module",
   "exports": {
-    "import": "./lib/index.mjs"
+    "import": "./lib/index.mjs",
+    "default": "./lib/index.mjs",
+    "types": "./lib/index.d.ts"
   },
   "files": [
     "lib",

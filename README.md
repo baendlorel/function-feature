@@ -4,6 +4,8 @@ High-performance V8 native function feature detection for Node.js. Supports Node
 
 > Note: Only works in Node.js environments. And prebuilds are only for linux.
 
+> Recommended: set "type": "module" in your package.json to use this module with ES6 imports.
+
 ## 📦 Installation
 
 ```bash
