@@ -66,34 +66,36 @@ void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
   isolate->ThrowException(err);
 }
 
-LStr _ToKey(Isol isolate, const char* k) {
+LVal _ToKey(Isol isolate, const char* k) {
   MStr maybe_key = v8::String::NewFromUtf8(isolate, k, STR_TYPE);
   LStr key;
   if (!maybe_key.ToLocal(&key)) {
     return key;  // Return an empty Local<String> if conversion fails
   }
-  return key;
+  return LVal::Cast(key);
 }
+
+void _SetVal(LObj result, const char* k, bool v) {}
 
 void _SetBool(LObj result, const char* k, bool v) {
   Isol isolate = result->GetIsolate();
   LCtx ctx = isolate->GetCurrentContext();
-  LStr key = _ToKey(isolate, k);
+  LVal key = _ToKey(isolate, k);
 
   auto value = v8::Boolean::New(isolate, v);
-  auto maybe_result = result->Set(ctx, LVal::Cast(key), value);
+  auto maybe_result = result->Set(ctx, key, value);
   maybe_result.Check();
 }
 
 void _SetFn(LObj result, const char* k, FnCB fn) {
   Isol isolate = result->GetIsolate();
   LCtx ctx = isolate->GetCurrentContext();
-  LStr key = _ToKey(isolate, k);
+  LVal key = _ToKey(isolate, k);
 
   auto tpl = v8::FunctionTemplate::New(isolate, fn);
   LFun value = tpl->GetFunction(isolate->GetCurrentContext()).ToLocalChecked();
 
-  auto maybe_result = result->Set(ctx, LVal::Cast(key), value);
+  auto maybe_result = result->Set(ctx, key, value);
   maybe_result.Check();
 }
 
