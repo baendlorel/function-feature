@@ -46,14 +46,17 @@ bool _HasBraceBeforeParen(const std::string& src) {
 }
 
 namespace function_feature {
+typedef v8::Isolate* Isol;
+typedef v8::FunctionCallback FnCB;
+
+// Local handle types
 typedef v8::Local<v8::Context> LCtx;
+typedef v8::Local<v8::Value> LVal;
+typedef v8::Local<v8::Proxy> LPxy;
 typedef v8::Local<v8::Function> LFun;
 typedef v8::Local<v8::String> LStr;
 typedef v8::MaybeLocal<v8::String> MStr;
 typedef v8::Local<v8::Object> LObj;
-typedef v8::Isolate* Isol;
-typedef v8::FunctionCallback FnCB;
-typedef v8::Local<v8::Value> LVal;
 
 void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
   info.GetIsolate()->ThrowException(v8::Exception::TypeError(
@@ -111,6 +114,14 @@ LFun _GetBoundOrigin(LFun func) {
     current = next;
   }
   return current;
+}
+
+LFun _GetProxyTarget(Isol isolate, LVal o) {
+  if (o->IsProxy()) {
+    LPxy proxy = LPxy::Cast(o);
+    return proxy->GetTarget();  // & proxied target must not be non-object
+  }
+  return v8::Undefined(isolate);
 }
 
 // Check if a function is a native constructor like Array, Boolean, etc.
@@ -245,6 +256,24 @@ void GetBound(const v8::FunctionCallbackInfo<v8::Value>& info) {
 
   LVal bound = func->GetBoundFunction();
   info.GetReturnValue().Set(bound);
+}
+
+void GetProxyTarget(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  if (info.Length() < 1) {
+    Throws(info, "Expected at least 1 argument");
+    return;
+  }
+
+  if (!info[0]->IsFunction()) {
+    Throws(info, "Argument must be a function");
+    return;
+  }
+
+  LVal arg0 = info[0];
+  LFun func = LFun::Cast(arg0);
+
+  LVal proxyTarget = _GetProxyTarget(func);
+  info.GetReturnValue().Set(proxyTarget);
 }
 
 void GetBoundOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
