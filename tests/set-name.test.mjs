@@ -20,4 +20,17 @@ describe('setName', () => {
     setName(fn, 'newName');
     assert.equal(fn.name, 'cannotmodify');
   });
+
+  it('sets name from symbol description', () => {
+    function fn() {}
+    setName(fn, Symbol('desc'));
+    assert.equal(fn.name, '[desc]');
+  });
+
+  it('sets name from symbol with undefined description', () => {
+    function fn() {}
+    const sym = Symbol();
+    setName(fn, sym);
+    assert.equal(fn.name, '');
+  });
 });
