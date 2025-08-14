@@ -57,17 +57,17 @@ typedef v8::Local<v8::Function> LFun;
 typedef v8::Local<v8::String> LStr;
 typedef v8::MaybeLocal<v8::String> MStr;
 typedef v8::Local<v8::Object> LObj;
+constexpr auto STR_TYPE = v8::NewStringType::kNormal;
 
 void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
-  info.GetIsolate()->ThrowException(v8::Exception::TypeError(
-      v8::String::NewFromUtf8(info.GetIsolate(), msg,
-                              v8::NewStringType::kNormal)
-          .ToLocalChecked()));
+  Isol isolate = info.GetIsolate();
+  MStr maybe_msg = v8::String::NewFromUtf8(info.GetIsolate(), msg, STR_TYPE);
+  LVal err = v8::Exception::TypeError(maybe_msg.ToLocalChecked());
+  isolate->ThrowException(err);
 }
 
 LStr _ToKey(Isol isolate, const char* k) {
-  auto strType = v8::NewStringType::kNormal;
-  MStr maybe_key = v8::String::NewFromUtf8(isolate, k, strType);
+  MStr maybe_key = v8::String::NewFromUtf8(isolate, k, STR_TYPE);
   LStr key;
   if (!maybe_key.ToLocal(&key)) {
     return key;  // Return an empty Local<String> if conversion fails
@@ -264,15 +264,16 @@ void GetProxyTarget(const v8::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  if (!info[0]->IsFunction()) {
-    Throws(info, "Argument must be a function");
+  LVal arg0 = info[0];
+  if (!arg0->IsObject() && !arg0->IsFunction()) {
+    Throws(info, "Argument must be a function or an object");
     return;
   }
 
-  LVal arg0 = info[0];
   LFun func = LFun::Cast(arg0);
+  Isol isolate = info.GetIsolate();
 
-  LVal proxyTarget = _GetProxyTarget(func);
+  LVal proxyTarget = _GetProxyTarget(isolate, func);
   info.GetReturnValue().Set(proxyTarget);
 }
 
