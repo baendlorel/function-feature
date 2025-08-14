@@ -15,6 +15,7 @@ import {
   getFeatures,
   getBound,
   getBoundOrigin,
+  getOrigin,
   setName,
   protoToString,
   isClass,
@@ -34,12 +35,13 @@ Analyze a JavaScript function using V8 internals and return its feature flags:
 - `isCallable`: true if the function is callable
 - `isBound`: true if the function is a bound function (created by `Function.prototype.bind`)
 - `isClass`: true if the function is a class (either user-defined or native)
+- `origin`: the true origin function, unwrapped from bound/proxy
 
 **Example:**
 
 ```js
 getFeatures(function test(a, b) {});
-// { isConstructor: false, isAsyncFunction: false, ... }
+// { isConstructor: false, isAsyncFunction: false, ..., origin: [Function: test] }
 ```
 
 ### getBound(fn: Function): Function | undefined
@@ -65,6 +67,19 @@ const f0 = function () {};
 const f1 = f0.bind(null, 1);
 const f2 = f1.bind(null, 2);
 getBoundOrigin(f2); // returns f0
+```
+
+### getOrigin(fn: Function): Function
+
+Get the true origin function, tracing through both bound and proxy wrappers. If not wrapped, returns itself.
+
+**Example:**
+
+```js
+const f0 = function () {};
+const proxy = new Proxy(f0, {});
+const bound = proxy.bind(null);
+getOrigin(bound); // returns f0
 ```
 
 ### setName(fn: Function, name: string): Function

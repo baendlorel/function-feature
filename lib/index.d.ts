@@ -19,6 +19,7 @@ interface FunctionFeaturesResult {
   isCallable: boolean;
   isBound: boolean;
   isClass: boolean;
+  origin: Function;
 }
 
 /**
@@ -48,6 +49,12 @@ export declare function getBound<T extends Fn>(fn: T): T | undefined;
  * console.log(getBoundOrigin(f0) === f0); // true
  */
 export declare function getBoundOrigin<T extends Fn>(fn: T): T | undefined;
+/**
+ * Get the true origin function, tracing through bound and proxy wrappers
+ * @param fn The function to trace
+ * @returns The original function (unwrapped)
+ */
+export declare function getOrigin<T extends Fn>(fn: T): T;
 
 /**
  * Set the name of a function

@@ -59,6 +59,7 @@ typedef v8::MaybeLocal<v8::String> MStr;
 typedef v8::Local<v8::Object> LObj;
 constexpr auto STR_TYPE = v8::NewStringType::kNormal;
 
+// #region Utils
 inline void Throws(v8::FunctionCallbackInfo<v8::Value> info, const char* msg) {
   Isol isolate = info.GetIsolate();
   MStr maybe_msg = v8::String::NewFromUtf8(info.GetIsolate(), msg, STR_TYPE);
@@ -106,6 +107,7 @@ void _Set(LObj result, const char* k, T v) {
   auto maybe_result = result->Set(ctx, key, value);
   maybe_result.Check();
 }
+// #endregion
 
 LFun _GetOrigin(Isol isolate, LFun func) {
   LFun current = func;
@@ -145,14 +147,6 @@ LFun _GetOrigin(Isol isolate, LFun func) {
   }
 
   return current;
-}
-
-LFun _GetProxyTarget(Isol isolate, LVal o) {
-  if (o->IsProxy()) {
-    LPxy proxy = LPxy::Cast(o);
-    return proxy->GetTarget();  // & proxied target must not be non-object
-  }
-  return v8::Undefined(isolate);
 }
 
 // Check if a function is a native constructor like Array, Boolean, etc.
@@ -290,7 +284,7 @@ void GetBound(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(bound);
 }
 
-void GetProxyTarget(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void GetProxyConfig(const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() < 1) {
     Throws(info, "Expected at least 1 argument");
     return;
@@ -302,11 +296,20 @@ void GetProxyTarget(const v8::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  LFun func = LFun::Cast(arg0);
   Isol isolate = info.GetIsolate();
+  LVal result;
+  if (arg0->IsProxy()) {
+    LPxy proxy = LPxy::Cast(arg0);
+    LVal proxyTarget = proxy->GetTarget();
+    LVal proxyHandler = proxy->GetHandler();
+    result = v8::Object::New(isolate);
+    _Set(result, "target", proxyTarget);
+    _Set(result, "handler", proxyHandler);
+  } else {
+    result = v8::Undefined(isolate);
+  }
 
-  LVal proxyTarget = _GetProxyTarget(isolate, func);
-  info.GetReturnValue().Set(proxyTarget);
+  info.GetReturnValue().Set(result);
 }
 
 void GetOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
@@ -398,6 +401,7 @@ void Init(v8::Local<v8::Object> target) {
   _Set(target, "getFeatures", GetFeatures);
   _Set(target, "getBound", GetBound);
   _Set(target, "getOrigin", GetOrigin);
+  _Set(target, "getProxyConfig", GetProxyConfig);
   _Set(target, "setName", SetName);
   _Set(target, "protoToString", ProtoToString);
   _Set(target, "isClass", IsClass);
