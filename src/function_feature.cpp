@@ -80,7 +80,7 @@ void _SetBool(LObj result, const char* k, bool v) {
   LCtx ctx = isolate->GetCurrentContext();
   LStr key = _ToKey(isolate, k);
 
-  v8::Local<v8::Boolean> value = v8::Boolean::New(isolate, v);
+  auto value = v8::Boolean::New(isolate, v);
   auto maybe_result = result->Set(ctx, LVal::Cast(key), value);
   maybe_result.Check();
 }
@@ -90,29 +90,50 @@ void _SetFn(LObj result, const char* k, FnCB fn) {
   LCtx ctx = isolate->GetCurrentContext();
   LStr key = _ToKey(isolate, k);
 
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, fn);
-  v8::Local<v8::Function> value =
-      tpl->GetFunction(isolate->GetCurrentContext()).ToLocalChecked();
+  auto tpl = v8::FunctionTemplate::New(isolate, fn);
+  LFun value = tpl->GetFunction(isolate->GetCurrentContext()).ToLocalChecked();
 
   auto maybe_result = result->Set(ctx, LVal::Cast(key), value);
   maybe_result.Check();
 }
 
-LFun _GetBoundOrigin(LFun func) {
+LFun _GetOrigin(Isol isolate, LFun func) {
   LFun current = func;
+
   while (true) {
+    bool changed = false;
+
+    // First check bound target
     LVal bound = current->GetBoundFunction();
-    if (bound->IsUndefined()) {
-      break;
+    if (bound->IsFunction()) {
+      LFun boundFunc = LFun::Cast(bound);
+      if (boundFunc != current) {
+        current = boundFunc;
+        changed = true;
+        continue;
+      }
     }
 
-    LFun next = LFun::Cast(bound);
-    // & prevent inpredictable infinite loop
-    if (next == current) {
+    // Then check proxy target
+    if (current->IsProxy()) {
+      LPxy proxy = LPxy::Cast(current);
+      LVal target = proxy->GetTarget();
+      if (target->IsFunction()) {
+        LFun targetFunc = LFun::Cast(target);
+        if (targetFunc != current) {
+          current = targetFunc;
+          changed = true;
+          continue;
+        }
+      }
+    }
+
+    // If no change occurred, we've reached the origin
+    if (!changed) {
       break;
     }
-    current = next;
   }
+
   return current;
 }
 
@@ -181,7 +202,7 @@ bool _IsClass(LFun func, Isol isolate) {
   }
 
   // Get the original function (not bound)
-  LFun origin = _GetBoundOrigin(func);
+  LFun origin = _GetOrigin(isolate, func);
 
   // Step 1: Check if it's a native constructor
   if (_IsNativeConstructor(origin, isolate)) {
@@ -216,6 +237,7 @@ LObj _GetFeatures(LFun fn, Isol isolate) {
   _SetBool(result, "isCallable", fn->IsCallable());
   _SetBool(result, "isBound", fn->GetBoundFunction()->IsFunction());
   _SetBool(result, "isClass", _IsClass(fn, isolate));
+  _SetBool(result, "origin", _GetOrigin(fn, isolate));
 
   return scope.Escape(result);
 }
@@ -277,7 +299,7 @@ void GetProxyTarget(const v8::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(proxyTarget);
 }
 
-void GetBoundOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void GetOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (info.Length() < 1) {
     Throws(info, "Expected at least 1 argument");
     return;
@@ -290,8 +312,9 @@ void GetBoundOrigin(const v8::FunctionCallbackInfo<v8::Value>& info) {
 
   LVal arg0 = info[0];
   LFun func = LFun::Cast(arg0);
+  Isol isolate = info.GetIsolate();
 
-  LFun origin = _GetBoundOrigin(func);
+  LFun origin = _GetOrigin(isolate, func);
   info.GetReturnValue().Set(origin);
 }
 
@@ -364,7 +387,7 @@ void IsClass(const v8::FunctionCallbackInfo<v8::Value>& info) {
 void Init(v8::Local<v8::Object> target) {
   _SetFn(target, "getFeatures", GetFeatures);
   _SetFn(target, "getBound", GetBound);
-  _SetFn(target, "getBoundOrigin", GetBoundOrigin);
+  _SetFn(target, "getOrigin", GetOrigin);
   _SetFn(target, "setName", SetName);
   _SetFn(target, "protoToString", ProtoToString);
   _SetFn(target, "isClass", IsClass);
