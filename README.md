@@ -6,6 +6,8 @@ High-performance V8 native function feature detection for Node.js. Supports Node
 
 > Recommended: set "type": "module" in your package.json to use this module with ES6 imports.
 
+For more awesome packages, check out [my homepage💛](https://baendlorel.github.io/?repoType=npm)
+
 ## 📦 Installation
 
 ```bash

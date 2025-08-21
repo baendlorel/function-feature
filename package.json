@@ -1,7 +1,8 @@
 {
   "name": "function-feature",
-  "version": "1.1.1",
-  "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction) or other features using native V8 APIs",
+  "version": "1.1.2",
+  "description": "Get V8 function type flags (IsConstructor, IsAsyncFunction, IsGeneratorFunction). Also includes features like getting bind source, Proxy source, function renaming, etc.",
+  "description_zh": "使用原生 V8 API 获取函数类型标志（IsConstructor、IsAsyncFunction、IsGeneratorFunction），也包含获取bind来源、Proxy来源、函数改名等功能",
   "author": {
     "name": "KasukabeTsumugi",
     "email": "futami16237@gmail.com"
